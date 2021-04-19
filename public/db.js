@@ -1,5 +1,3 @@
-const { get } = require("mongoose");
-
 let db;
 
 const request = indexedDB.open("budget, 1");
@@ -9,7 +7,7 @@ request.onupgradeneeded = function (event) {
   db.createObjectStore("pending", { autoIncrement: true });
 };
 
-request.onsuccess = function (event) {
+request.onsuccess = function(event) {
   db = event.taget.result;
 
   if (navigator.onLine) {
@@ -18,47 +16,44 @@ request.onsuccess = function (event) {
 };
 
 request.onerror = function (event) {
-    console.log("erm.." + event.taget.errorCode);
-    
+  console.log("erm.." + event.taget.errorCode);
 };
 
-function saveRecord(record){
-    const transaction = db.transaction(["pending"], "readWrite");
+function saveRecord(record) {
+  const transaction = db.transaction(["pending"], "readWrite");
 
-    const store = transaction.objectStore("pending");
+  const store = transaction.objectStore("pending");
 
-    store.add(record);
+  store.add(record);
 }
 
 function checkDatebase() {
+  const transaction = db.transaction(["pending"], "readWrite");
 
-    const transaction = db.transaction(["pending"], "readWrite");
+  const store = transaction.objectStore("pending");
 
-    const store = transaction.objectStore("pending");
+  const getAll = store.getAll();
 
-    const getAll = store.getAll();
+  getAll.onsuccess = function () {
+    if (getAll.result.length > 0) {
+      fetch("/api/transaction/bulk", {
+        method: "POST",
+        body: JSON.stringify(getAll.result),
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+      })
+        .then((respone) => respone.json())
+        .then(() => {
+          const transaction = db.transaction(["pending"], "readWrite");
 
-    getAll.onsuccess = function () {
-        if(getAll.result.length > 0) {
-            fetch("/api/transaction/bulk", {
-                method: "POST",
-                body: JSON.stringify(getAll.result),
-                headers: {
-                    Accept: "application/json, text/plain, */*",
-                    "Content-Type": "application/json"
-                }
-            })
-            .then(respone => respone.json())
-            .then(() => {
-                const transaction = db.transaction(["pending"], "readWrite");
+          const store = transaction.objectStore("pending");
 
-                const store = transaction.objectStore("pending");
-
-                store.clear();
-            });
-        }
-        
-    };
+          store.clear();
+        });
+    }
+  };
 }
 
 window.addEventListener("online", checkDatabase);
