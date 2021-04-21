@@ -20,6 +20,7 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb+srv://carefree2706:donaldwu
   useFindAndModify: false
 });
 
+// "mongodb://localhost/budget"
 // routes
 app.use(require("./routes/api.js"));
 
