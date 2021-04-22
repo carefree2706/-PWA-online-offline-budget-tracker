@@ -15,9 +15,10 @@ app.use(express.json());
 
 app.use(express.static("public"));
 
-mongoose.connect(process.env.MONGODB_URI || "mongodb+srv://carefree2706:donaldwu0512@cluster0.g0gac.mongodb.net", {
+mongoose.connect(process.env.MONGODB_URI || `mongodb://localhost/budget`, {
   useNewUrlParser: true,
-  useFindAndModify: false
+  useFindAndModify: false,
+  useUnifiedTopology: true
 });
 
 // "mongodb://localhost/budget"
